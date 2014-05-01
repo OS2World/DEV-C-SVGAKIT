@@ -1,0 +1,557 @@
+                      SVGAKIT for emx, Version 1.8
+                      ----------------------------
+
+
+This SVGAKIT for emx is an extension of the fullscreen graphics library
+of emx. Most of the functions contained in the graphics library for emx have
+not been changed, so this documentation explains only new features of the
+SVGAKIT. Refer to emx's libref.doc for full reference to the emx graphics
+library.
+
+
+1.  System Requirements:
+------------------------
+
+- emx 0.9a or later
+- the emx VESA package (available from the same site as svgakit)
+- graphics adapter supported by emx VESA package or standard vga
+
+
+2.  Supported Video-Modes:
+--------------------------
+
+All 16, 256, 32k, 64k and 16m-Color modes supported by the emx VESA package
+should work.
+
+
+3.  Installation:
+-----------------
+
+See Installation of the VESA package for emx first.
+
+Unzip the package. All files should be extracted to \emx\jm\svgakit.1_8.
+Type "make install" to compile the library (jmgraph.a) and the test programs.
+After compilation the library will be copied to \emx\lib and the header file
+jmgraph.h will be copied to \emx\include.
+
+In prior versions of SVGAKIT the library was called graph.a and the header
+file was called graph.h. If you installed any prior version of SVGAKIT you
+may delete these files now or type "make oldinstall" to overwrite them with
+jmgraph.a and jmgraph.h.
+
+Run "GRAPH.EXE". Type "graph -h" for help on the parameters.
+
+Run the small Targa-Viewer "TGAVIEW.EXE". Type "tgaview -h" for help on the
+parameters.
+
+Note: Some make utilities fail to install the svgakit properly.
+      If this happens, try "make install2" or "make oldinstall2"
+      instead of "make install" or "make oldinstall".
+      However this requires the "cp" program. It is available with
+      the gnu file utilities, available from ftp.cdrom.com.
+      If you don't want to install the "cp" program you'll have to
+      do the last installation steps yourself:
+        copy jmgraph.h \emx\include
+        copy jmgraph.a \emx\include
+      or (instead of "make oldinstall")
+        copy jmgraph.h \emx\include\graph.h
+        copy jmgraph.a \emx\include\graph.a
+
+
+4.  Running Programs in Background and a Word on Screen Locking (OS/2 only):
+----------------------------------------------------------------------------
+
+In contrast to the original graphics library for emx, it is now possible
+to access the display when your program is executed in background. SVGAKIT
+holds the display memory in a virtual display buffer when the program is in
+background.
+In addition, SVGAKIT installs its own screen locking functions. If you called
+g_lock(), it is not possible to switch to the program or from the program to
+another program, unless you call g_unlock().
+If you called g_lock() in the original graphics library, the program stopped,
+until you switched it into foreground and you could not switch back, unless
+you called g_unlock().
+
+Because all functions in this package that require a locked screen
+lock the screen themselves, it is not necessary for you to lock the
+screen.  But if you do so, screen output will become much
+faster. Remember, though, that it is not possible to switch from or to
+your program while the screen is locked. So do not lock the screen for
+more than a few seconds.
+
+If you install a virtual screen using g_virtual(), the physical screen is
+automatically unlocked. If you call g_refresh() to update the physical
+screen, the physical screen is locked for the time of the update process.
+Calling g_real() to remove the virtual screen locks the physical screen,
+if you called g_lock() any time before (without calling g_unlock()).
+
+
+5.  The font library:
+---------------------
+- The font library (originally written by Matthias Burian) uses the stroked
+  fonts shipped with most Borland compilers. You may get them via anonymous
+  ftp from ftp.cdrom.com:/pub/SimTel/msdos/borland/bgifonts.zip.
+  Please read the README file contained in bgifonts.zip for copyright
+  information!
+
+- You may get a font editor via anonymous from ftp.cdrom.com:
+  /pub/SimTel/msdos/borland/bgifont.zip to create your own non copyright
+  protected fonts.
+  Note that this font editor has a bug: The header of the files it creates
+  is 92 bytes to long. Therefore neither the font library nor the editor
+  can read these fonts.
+  To fix fonts created by this font editor use the program DD.EXE,
+      contained in ftp.cdrom.com:/pub/os2/2_x/unix/gnufutil.zip (OS/2)
+               and ftp.cdrom.com:/pub/SimTel/msdos/gnuish/futi14ax.zip (DOS).
+  Then call "dd if=<oldname>.CHR of=<newname>.chr skip=92 bs=1".
+
+  Feel free to send fonts you created to me (see section 11).
+
+- I created a simple default font that only has capital letters, digits
+  and some signs. You may use it under the same conditions as the
+  whole svgakit (see section 9). If you like, you may add the missing
+  characters and send the result to me.
+
+
+6.  Addition to libref.doc:
+---------------------------
+
+Include the following passage in /emx/doc/libref.doc:
+
+---cut here---
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_getpal(char *pal, int first, int n)
+
+         Get palette entries from first to (first + n - 1).
+
+See also: g_setpal
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_getimage(int x0, int y0, int x1, int y1, char *buf)
+
+         Copy contents of specified rectangle on screen to buf.
+
+         In 16 color modes x0 must be a multiple of 8, x1 must
+         be a multiple of 8 minus 1.
+
+See also: g_imagesize, g_putimage
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int g_imagesize(int width, int height)
+
+         Returns how much memory (in bytes) is needed to copy
+         a rectangle of specified width and height.
+
+See also: g_getimage, g_putimage
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int g_init(void)
+
+         Initialize the vesa_emx library. This is automatically
+         done when first calling a vesa function. However, you
+         may want to initialize the library when your programs
+         starts or some other time.
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int g_memsize;
+
+         Minimum buffer size to save graphics screen by g_save.
+
+See also: g_restore, g_save
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_putimage(int x0, int y0, int x1, int y1, char *buf)
+
+         Copy contents of buf to specified rectangle on screen.
+
+         In 16 color modes x0 must be a multiple of 8, x1 must
+         be a multiple of 8 minus 1.
+
+See also: g_imagesize, g_getimage
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_real (int copy_buf, int copy_pal);
+
+         Removes the virtual screen (and palette in 256 color modes)
+         installed by g_virtual. If copy_buf != 0 then copy the contents
+         of the virtual screen to the physical screen. If copy_pal != 0
+         copies the virtual palette to the physical palette. All drawing
+         commands now act on the physical screen.
+
+See also: g_refresh, g_virtual
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_refresh (int x0, int y0, int x1, int y1, int x2, int y2, int pal);
+
+         Updates a part of the physical screen with the contents of the
+         virtual screen. (x0,y0)-(x1,y1) specify a rectangle in the
+         virtual screen to be copied to (x2,y2) in the physical screen.
+         If pal != 0 the physical palette is updated with the virtual
+         palette.
+
+         In 16 color modes x0 and x2 must be a multiple of 8, x1 must
+         be a multiple of 8 minus 1.
+
+         Note that this function doesn't take care of clipping.
+
+See also: g_real, g_virtual
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_restore (void *buf);
+
+         Restore graphics screen from buffer.
+
+See also: g_save, g_memsize
+
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_save (void *buf);
+
+         Save graphics screen to the buffer pointed to by buf. The
+         buffer has to be large enough to hold all graphics
+         information (minimum buffer size is stored in g_memsize).
+
+See also: g_restore, g_memsize
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void g_virtual (int copy_buf, int copy_pal);
+
+         Install a virtual screen (and palette in 256 color modes).
+         If copy_buf != 0 then copy the contents of the physical screen
+         to the virtual screen. If copy_pal != 0 then copy the physical
+         palette to the virtual palette. All drawing commands now act
+         on the virtual screen until g_real or g_mode is called.
+
+See also: g_real, g_refresh
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void gf_drawchar (int x, int y, char c, int color);
+
+         Draw the character c starting at the position (x,y) in the
+         specified color on the screen. Before calling this function
+         you have to load a font using gf_loadfont.
+         You can change the size of the character using gf_setscale.
+         You can change the direction in which characters are drawn
+         using gf_setdirection.
+
+See also: gf_drawstring, gf_getcharheight, gf_getcharwidth, gf_loadfont,
+          gf_setdirection, gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void gf_drawstring (int x, int y, const char *str, int color);
+
+         Draw the string str starting at the position (x,y) in the
+         specified color on the screen. Before calling this function
+         you have to load a font using gf_loadfont.
+         You can change the size of the character using gf_setscale.
+         You can change the direction in which characters are drawn
+         using gf_setdirection.
+
+See also: gf_drawchar, gf_getstringheight, gf_getstringwidth, gf_loadfont,
+          gf_setdirection, gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getcharheight(char c);
+
+         Determine the height of the character c assuming it is drawn
+         on the screen using the current scale and direction. Before
+         calling this function you have to load a font using gf_loadfont.
+
+See also: gf_drawchar, gf_getcharwidth, gf_loadfont, gf_setdirection,
+          gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getcharwidth(char c);
+
+         Determine the width of the character c assuming it is drawn
+         on the screen using the current scale and direction. Before
+         calling this function you have to load a font using gf_loadfont.
+
+See also: gf_drawchar, gf_getcharheight, gf_loadfont, gf_setdirection,
+          gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getdirection(void);
+
+         Return the current text drawing direction: RIGHT, UP or DOWN.
+
+See also: gf_drawchar, gf_getdrawstring, gf_setdirection
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getfontinfo(char **name, int *orgcap, int *orgbase, int *orgdec);
+
+         Return information on the font currently loaded:
+         - name of disk file containing the font data
+         - height from origin to top of capitol
+         - height from origin to baseline
+         - height from origin to bottom of decender
+         A font must be loaded using gf_loadfont before calling this
+         function.
+
+See also: gf_loadfont
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void gf_getscale(double *width, double *height);
+
+         Return the current text drawing scaling factors. The default
+         scaling factor is 1.0 for both directions.
+
+See also: gf_setscale, gf_drawchar, gf_drawstring, gf_getcharheight,
+          gf_getcharwidth, gf_getstringheight, gf_getstringwidth
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getstringheight(const char *str);
+
+         Determine the height of the string str assuming it is drawn
+         on the screen using the current scale and direction. Before
+         calling this function you have to load a font using gf_loadfont.
+
+See also: gf_drawstring, gf_getstringwidth, gf_loadfont, gf_setdirection,
+          gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_getstringwidth(const char *str);
+
+         Determine the width of the string str assuming it is drawn
+         on the screen using the current scale and direction. Before
+         calling this function you have to load a font using gf_loadfont.
+
+See also: gf_drawstring, gf_getstringheight, gf_loadfont, gf_setdirection,
+          gf_setscale
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int gf_loadfont(const char *name);
+
+         Load a font from the disk file specified by name into memory.
+         This is neccessary in order for a font to be used. The font
+         file must be Borland BGI 1.x compatible. gf_loadfont searches
+         for the font file in current directory and in the directory
+         specified in the EMXFONT environment variable.
+         You can use the following predefined constants for name:
+            DEFFONT     - default font that comes with svgakit
+            TRIPLEX     - Borlands triplex font
+            SANSSER     - Borlands sans serif font
+            EUROFON     - Borlands euro font
+            GOTHICF     - Borlands gothic font
+            SCRIPTF     - Borlands script font
+            LCOMFON     - Borlands lcom font
+            LITTLEF     - Borlands little font
+            TSCRFON     - Borlands tscr font
+            SIMPLEX     - Borlands simplex font
+         gf_loadfont returns 1 on success, else 0.
+
+See also: gf_* and section 5
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void gf_setdirection(int direction);
+
+         Set the text drawing direction. Currently only NORMAL,
+         RIGHT, UP and DOWN are supported.
+
+See also: gf_drawchar, gf_drawstring
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+void gf_setscale(double width, double height);
+
+         Set the text drawing scaling factors. The default scaling
+         factor is 1.0 for both directions.
+
+See also: gf_drawchar, gf_drawstring
+------------------------------------------------------------------------------
+---cut here---
+
+Change the reference for g_mode(), g_unlock() and g_unlockall() in libref.doc:
+---cut here---
+------------------------------------------------------------------------------
+#include <jmgraph.h>                                             [emx/svgakit]
+
+int g_mode (int mode);
+
+    Select graphics mode. mode is the VESA mode number of the graphics
+    mode to select. "jmgraph.h" defines several aliases for
+    the common VESA mode numbers. Because the supported graphics modes
+    differ between the different graphic adapters you should let the
+    user choose a graphics mode via command line switch.
+
+    When switching to text mode g_mode() always returns 0. When
+    switching to graphics mode, 1 is returned on success else 0.
+
+    The global variables g_xsize, g_ysize, g_colors and g_memsize are
+    set.  The clipping rectangle is set to the entire screen.
+
+    General information about the graphics library: Programs using the
+    graphics library work both under DOS and in OS/2 full-screen
+    sessions.  The coordinates of the screen are (0,0) (upper left)
+    through (g_xsize-1,g_ysize-1) (lower right).  You have to link
+    with graph (use the -lgraph option) and vesa (use the -lvesa
+    option).
+    Under DOS, emx option -acim is required, see `Using emx options'.
+
+    Example: /emx/test/graph.c
+
+    See also: g_clip(), g_modeset(), g_colors, g_xsize, g_ysize
+------------------------------------------------------------------------------
+void g_unlock (int modified);
+void g_unlockall (int modified);
+
+    Unlock the screen.  g_unlock() undoes one invocation of g_lock()
+    by decrementing the counter incremented by g_lock().  If the
+    counter reaches zero, the screen is unlocked.  If the counter
+    already was zero, the counter is not changed.  g_unlockall()
+    undoes all invocations of g_lock() by resetting the counter to
+    zero and unlocking the screen if the counter was non-zero.
+
+    Set modified to 1, if you modified the contents of your screen since
+    the last call to g_lock(), else set modified to 0.
+
+    See also: g_lock()
+------------------------------------------------------------------------------
+---cut here---
+
+
+7.  Known Problems:
+-------------------
+
+- none right now?
+
+
+8.  History:
+------------
+
+Version 1.0:
+  - initial release
+Version 1.1 (04/03/1993):
+  - added DOS/VESA support
+  - put SVGA card relevant stuff in DLL's (now in emx VESA package)
+    to keep it away from other code
+  - added support for variable scanline length
+Version 1.2 (04/13/1993):
+  - added support for non bios standard vga modes
+    (320x240x256, 320x400x256, 320x480x256)
+  - added functions g_getimage, g_imagesize and g_putimage
+Version 1.3 (05/14/1993)
+  - bug fixes to support graphics adapters with a single memory
+    window for both read and write operations
+    (such as trident 8900)
+  - changed makefile for compatibilty with any (?) make
+  - added virtual screen support (g_virtual, g_refresh, g_real)
+Version 1.4 (06/23/1993)
+  - fixed some bugs:
+    - switching session by CTRL-ESC made the program dump its core
+      after a call to g_mode(GMODE_VGA_OFF) (OS/2 only).
+    - palette manipulation was not possible (DOS only).
+    - case of different window-size and -granularity was
+      handled wrong.
+Version 1.5 (12/20/1993)
+  - adjusted to run with emx 0.8h and vesa_emx 1.5.
+    Note that g_unlock() and g_unlockall() have been changed!
+Version 1.6 (04/28/1994)
+  - graph.h and graph.a renamed to jmgraph.h and jmgraph.a (optionally)
+  - "make install2"/"make oldinstall2" uses now cp instead of copy
+    (for compatibility with gnumake)
+  - support for 16 color modes
+  - bugs fixed
+  - tgaview can now do color reduction (for 16- and 256-color modes)
+    (not a very good algorithm..., does anyone know a better one?)
+Version 1.7 (10/15/1994)
+  - minor bugs fixed
+  - g_wmode now implemented, support G_NORM, G_OR, G_AND and G_XOR
+    write modes
+  - Matthias Burian's stroked font package included (with changes)
+Version 1.8 (02/10/1995)
+  - minor bugs fixed
+  - new default stroked font
+Version 1.9 (03/05/1996)
+  - g_save and g_restore saved/restored the image upside down when
+    running with vesa_pm.dll. This error is now fixed.
+  - problems with True Color modes fixed (AL).
+  - support for 16m 32 bits per pixel modes (AL).
+  - global variable 'g_32Bit' added in 'graph1.c'. 'g_32Bit == TRUE' if
+    the activated mode is a 16m 32 bits per pixel mode (AL).
+  - internal variables '_g_winmask', '_g_winshift' and '_g_different_winsegs'
+    added for marginally speed ups. '_g_winmask' and '_g_winshift' are used
+    for faster 'win' and 'offset' computations. '_g_different_winsegs' is a
+    flag which indicates different segments of the read and write window (AL).
+  - variables '_g_xxx_shift' , '_g_xxx_mask' and '_g_col_shr'
+    (xxx = red, green or blue) added. They are used for correct and easy color
+    computations in RGB-modes. (Look for the macro 'RGB' in 'jmgraph.h').
+    The macros 'RGB15', 'RGB16' and 'RGB24' are now obsolete (AL).
+  - for speed up, 'svgakit' uses now different 'memxxx'-macros
+    (defined in 'graph3.h') if the activated mode has different read write
+    window segments or not (AL).
+  - new version of 'graph.c' which uses all additions and changes (AL).
+
+
+9.  Future plans:
+-----------------
+
+- fix problems mentioned in 7.
+- ...
+
+
+10.  License and Copying:
+-------------------------
+
+Most of the code is taken from the original graphics library for emx,
+so it is copyright by Eberhard Mattes. Refer to copying.emx (included in
+the emx package) for further information.
+The other code is Copyright (C) 1993-1994 Johannes Martin. It is to be used
+and copied under the same conditions as the rest of the package, so look at
+copying.emx again...
+
+
+11.  Thanks:
+------------
+
+Thanks to all who reported bugs and helped to correct them.
+Thanks to Matthias Burian for providing his stroked font package.
+Thanks to Cecil Churms for creating the new default stroked font.
+
+
+12.  Authors:
+-------------
+
+Johannes Martin
+Pfarrer-Dorn-Straáe 25
+D-55127 Mainz Marienborn
+Germany
+eMail: jmartin@goofy.zdv.uni-mainz.de
+
+Additions for version 1.9 (labeled (AL) in section 8) by:
+Andreas Leipelt
+Mathematisches Seminar der
+Universitaet Hamburg
+Bundesstrasse 55
+20146 Hamburg
+Germany
+eMail: leipelt@math.uni-hamburg.de
